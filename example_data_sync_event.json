@@ -1,0 +1,15 @@
+{
+  "version": "0",
+  "id": "example0-c014-d9e9-d7ac-44f00d5d1200",
+  "detail-type": "DataSync Task Execution State Change",
+  "source": "aws.datasync",
+  "account": "<accountId>",
+  "time": "2019-01-23T12:35:26Z",
+  "region": "us-west-2",
+  "resources": [
+    "arn:aws:sync:us-west-2:<accountId>:task/task-example23d67d5be5/execution/exec-example316440271f"
+  ],
+  "detail": {
+    "State": "SUCCESS"
+  }
+}

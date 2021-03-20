@@ -1,0 +1,41 @@
+{
+  "TaskExecutionArn": "arn:aws:datasync:us-east-1:<accountId>:task/task-01b22c5b90a844bab/execution/exec-0c5acdd8c9e888681",
+  "Status": "SUCCESS",
+  "Options": {
+    "VerifyMode": "ONLY_FILES_TRANSFERRED",
+    "OverwriteMode": "ALWAYS",
+    "Atime": "BEST_EFFORT",
+    "Mtime": "PRESERVE",
+    "Uid": "NONE",
+    "Gid": "NONE",
+    "PreserveDeletedFiles": "PRESERVE",
+    "PreserveDevices": "NONE",
+    "PosixPermissions": "NONE",
+    "BytesPerSecond": -1,
+    "TaskQueueing": "ENABLED",
+    "LogLevel": "BASIC",
+    "TransferMode": "ALL"
+  },
+  "Excludes": [],
+  "Includes": [
+    {
+      "FilterType": "SIMPLE_PATTERN",
+      "Value": "/20210219_NOVASEQ249_1_BNS419-05-25-19"
+    }
+  ],
+  "StartTime": "2021-03-18T15:15:19.766000-04:00",
+  "EstimatedFilesToTransfer": 3,
+  "EstimatedBytesToTransfer": 578755,
+  "FilesTransferred": 3,
+  "BytesWritten": 578755,
+  "BytesTransferred": 578755,
+  "Result": {
+    "PrepareDuration": 1242,
+    "PrepareStatus": "SUCCESS",
+    "TotalDuration": 9763,
+    "TransferDuration": 8197,
+    "TransferStatus": "SUCCESS",
+    "VerifyDuration": 169,
+    "VerifyStatus": "SUCCESS"
+  }
+}
