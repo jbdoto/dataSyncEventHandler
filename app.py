@@ -9,6 +9,8 @@ step_client = boto3.client('stepfunctions')
 
 
 def handle_event(event, context):
+    """Handle a DataSync EventBridge Success event.  """
+
     try:
         print("Received event: " + json.dumps(event, indent=2))
 
