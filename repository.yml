@@ -1,0 +1,20 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: DataSyncEventHandlerECRRepository
+
+Resources:
+  DataSyncEventHandlerECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: datasync-event-handler
+      Tags:
+        - Key: "Name"
+          Value: "datasync-event-handler"
+
+Outputs:
+  Arn:
+    Value: !GetAtt DataSyncEventHandlerECRRepository.Arn
+
+
+# aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 483158796244.dkr.ecr.us-east-1.amazonaws.com
+# aws cloudformation create-stack --stack-name DataSyncEventHandlerECRRepository --template-body file://repository.yml  --profile=gsat --region=us-east-1
