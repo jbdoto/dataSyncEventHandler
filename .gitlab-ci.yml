@@ -1,37 +1,62 @@
+stages:
+  - build
+
 create-repo:
-  stage: deploy
+  stage: build
   script:
     - apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
     - python3 -m ensurepip
     - pip3 install --no-cache --upgrade pip awscli
     - aws cloudformation deploy --template-file repository.yml --stack-name dataSyncEventHandlerECRRepository --capabilities CAPABILITY_IAM --no-fail-on-empty-changeset
 
-build-docker:
-  image: docker:19.03.12
-  variables:
-    # When using dind service, we need to instruct docker to talk with
-    # the daemon started inside of the service. The daemon is available
-    # with a network connection instead of the default
-    # /var/run/docker.sock socket. Docker 19.03 does this automatically
-    # by setting the DOCKER_HOST in
-    # https://github.com/docker-library/docker/blob/d45051476babc297257df490d22cbd806f1b11e4/19.03/docker-entrypoint.sh#L23-L29
-    #
-    # The 'docker' hostname is the alias of the service container as described at
-    # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services.
-    #
-    # Specify to Docker where to create the certificates, Docker will
-    # create them automatically on boot, and will create
-    # `/certs/client` that will be shared between the service and job
-    # container, thanks to volume mount from config.toml
-    DOCKER_TLS_CERTDIR: "/certs"
-
-  services:
-    - docker:19.03.12-dind
-
-  before_script:
-    - docker info
-
+# Build the image with kaniko
+build-docker-image:
   stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: ['']
+  variables:
+    IMAGE_TAG: 1.0.0
+    AWS_DEFAULT_REGION: us-east-1
+    DOCKER_REGISTRY: 353276416433.dkr.ecr.us-east-1.amazonaws.com
+    IMAGE: datasync-event-handler
+    KANIKO_EXTRA_ARGS: ''
+  before_script:
+    - /kaniko/executor version
   script:
-    - docker build -t bcl2fastq .
-    #- docker run my-docker-image /script/to/run/tests
+    # Debugging
+    # - set -x
+    # - env
+    # - /kaniko/executor --help
+    # - export KANIKO_EXTRA_ARGS="$KANIKO_EXTRA_ARGS --verbosity debug"
+
+    # Exit on error
+    - set -e
+
+    # Docker Registry Authentication with ecr-login (pre-installed on kaniko 'debug' image)
+    #   https://github.com/awslabs/amazon-ecr-credential-helper
+    - mkdir -p /kaniko/.docker
+    - >
+      echo "{\"credHelpers\": {\"$DOCKER_REGISTRY\": \"ecr-login\"}}" > /kaniko/.docker/config.json
+
+    # verify IMAGE set
+    - if [ -z "$IMAGE" ]; then
+    -   echo "Variable IMAGE must be set!"
+    -   exit 1
+    - fi
+
+    - export DOCKER_IMAGE="$DOCKER_REGISTRY/$IMAGE"
+
+    # Tag master branch builds as latest
+    - if [ "$CI_COMMIT_REF_NAME" = "master" ]; then
+      export KANIKO_EXTRA_ARGS="$KANIKO_EXTRA_ARGS --destination $DOCKER_IMAGE:latest";
+      fi
+
+    # Build image
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR
+      --destination $DOCKER_IMAGE:$CI_COMMIT_SHA
+      --destination $DOCKER_IMAGE:$IMAGE_TAG
+      --build-arg "CI_JOB_TOKEN=$CI_JOB_TOKEN"
+      --log-timestamp
+      $KANIKO_EXTRA_ARGS
